@@ -6,6 +6,6 @@ ADD package.json .
 ADD package-lock.json .
 RUN npm i
 
-ADD * ./
+ADD ** ./
 
 ENTRYPOINT ["node", "index.js"]
