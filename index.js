@@ -24,8 +24,33 @@ function print(err, result) {
 }
 
 var express = require('express')
-var app = express()
+var middleware = require("express-opentracing").default;
 cons = require('consolidate')
+
+var app = express()
+
+// install tracer
+var jaeger = require('jaeger-client');
+var opentracing = require('opentracing');
+var initTracer = jaeger.initTracer;
+// let reporter = new jaeger.RemoteReporter();
+var config = {
+    serviceName: 'nextcloud-backup-monitor',
+    reporter: {
+        agentHost: process.env.JAEGER_HOST
+    }
+};
+var options = {
+    logger: console
+};
+var tracer = initTracer(config, options);
+app.use(middleware({tracer: tracer}));
+
+if(process.env.ENABLE_ZIPKIN_INJECTOR) {
+    let codec = new jaeger.ZipkinB3TextMapCodec({ urlEncoding: true });
+    tracer.registerInjector(opentracing.FORMAT_HTTP_HEADERS, codec);
+    tracer.registerExtractor(opentracing.FORMAT_HTTP_HEADERS, codec);
+}
 
 // assign the swig engine to .html files
 app.engine('html', cons.twig);
