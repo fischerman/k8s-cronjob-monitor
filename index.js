@@ -25,6 +25,7 @@ function print(err, result) {
 
 var express = require('express')
 var middleware = require("express-opentracing").default;
+var util = require('util');
 cons = require('consolidate')
 
 var app = express()
@@ -68,6 +69,7 @@ app.get('/api/json', function (req, res) {
 })
 
 app.get('/', function (req, res) {
+    console.log(util.inspect(req.headers, {depth: 3}))
     getBackupJobs((err, jobs) => {
         if(err)
             throw err;
